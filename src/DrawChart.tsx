@@ -1,6 +1,5 @@
+import { Key } from "react";
 import {
-  LineChart,
-  Line,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -8,56 +7,77 @@ import {
   Legend,
   Area,
   Bar,
+  ComposedChart,
+  Cell,
 } from "recharts";
 
-const DrawChart = ({ data }: any) => {
+import styled from "styled-components";
+import CustomTooltip from "./CustomTooltip";
+
+const DrawChart = ({ data, filter, setFilter }: any) => {
   return (
-    <LineChart
-      width={2200}
-      height={400}
-      data={data}
-      margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-    >
-      <XAxis dataKey="time" />
-      <YAxis yAxisId="left" />
-      <YAxis yAxisId="right" orientation="right" />
-      <CartesianGrid strokeDasharray="3 3" />
-      <Tooltip
-        content={({ payload, active }: any) => {
-          if (active) {
-            return (
-              <div className="custom-tooltip">
-                {payload.map((data: any, index: any) => (
-                  <div key={index} className="intro">
-                    <p>{`id : ${data.payload.id}`}</p>
-                    <p>{`value_area : ${data.payload.value_area}`}</p>
-                    <p>{`value_bar : ${data.payload.value_bar}`}</p>
-                  </div>
-                ))}
-              </div>
-            );
-          }
-          return null;
-        }}
-      />
-      <Legend />
-      <Line
-        yAxisId="left"
-        type="monotone"
-        dataKey="value_area"
-        stroke="#8884d8"
-        activeDot={{ r: 8 }}
-      />
-      <Area
-        yAxisId="left"
-        type="monotone"
-        dataKey="value_area"
-        stroke="#8884d8"
-        fill="#8884d8"
-      />
-      <Bar yAxisId="right" dataKey="value_bar" barSize={20} fill="#413ea0" />
-    </LineChart>
+    <ChartStayle>
+      <ComposedChart width={4200} height={500} data={data}>
+        <XAxis dataKey="time" />
+        <YAxis yAxisId="left" />
+        <YAxis yAxisId="right" orientation="right" />
+        <Tooltip content={<CustomTooltip />} />
+        <CartesianGrid stroke="#f5f5f5" />
+        <Legend />
+        <Area
+          yAxisId="right"
+          type="monotone"
+          dataKey="value_area"
+          stroke="#82ca9d"
+          fill="#82ca9d"
+        />
+        <Bar
+          yAxisId="left"
+          dataKey="value_bar"
+          fill="#8884d8"
+          barSize={15}
+          onClick={(data) => setFilter(data.id)}
+          order={0}
+        >
+          {data.map((el: { id: any }, idx: Key | null | undefined) => (
+            <Cell key={idx} fill={el.id === filter ? "#E94560" : "#8884d8"} />
+          ))}
+        </Bar>
+      </ComposedChart>
+    </ChartStayle>
   );
 };
 
 export default DrawChart;
+
+const ChartStayle = styled.div`
+  overflow-x: scroll;
+  overflow-y: hidden;
+  width: 80%;
+  padding: 10px 10px;
+
+  ::-webkit-scrollbar {
+    width: 8px; /* 스크롤바의 너비 */
+  }
+
+  ::-webkit-scrollbar-thumb {
+    height: 30%; /* 스크롤바의 길이 */
+    background: #217af4; /* 스크롤바의 색상 */
+    border-radius: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: rgba(33, 122, 244, 0.1); /*스크롤바 뒷 배경 색상*/
+  }
+
+  ul {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    position: fixed;
+    bottom: 10vh;
+    left: 0;
+    font-size: 30px;
+    z-index: 3;
+  }
+`;
